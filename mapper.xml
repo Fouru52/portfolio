@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="admin_DB">
+	
+	<!-- 회원가입 이메일, 연락처 체크 -->
+	<select id="email" parameterType="String" resultType="Integer">
+		select count(*) from admin where aemail = #{aemail} 
+	</select>
+	
+	<select id="hp" parameterType="String" resultType="Integer">
+		select count(*) from admin where atel2 = #{atel2} 
+	</select>
+	
+	<select id="hp_2" parameterType="String" resultType="Integer">
+		select count(*) from admin where atel3 = #{atel3} 
+	</select>
+	
+
+	<!-- 로그인 카운팅 확인 -->
+	<select id="count_ck" parameterType="String" resultType="Integer">
+		select acount from admin where aid = #{aid}
+	</select>
+	
+	<!-- 예매 리스트 검색 -->
+	<select id="ticket_search" parameterType="Map" resultType="ticketdto">
+	select * from ticket
+	<where>
+		<if test="part == 1">
+			user_name like concat('%',#{search},'%')
+		</if>
+		
+		<if test="part == 2">
+			user_tel like concat('%',#{search},'%')
+		</if>
+	</where>
+		order by tidx desc
+	</select>
+	
+	<!-- 예매 리스트 -->
+	<select id="ticket_list" parameterType="String" resultType="ticketdto">
+	select * from ticket order by tidx desc
+	</select>
+
+	<!-- code 중복체크 -->
+	<select id="code_ck" resultType="aircodedto">
+	select * from air_code where aircode = #{aircode}
+	</select>
+	
+	<!-- Faq 등록 -->
+	<insert id="faq_write" parameterType="String" >
+	insert into faq(fidx,fsubject,fwriter,ftext,fdate) values('0',#{fsubject},#{fwriter},#{ftext},now())
+	</insert>
+	
+	<!-- Faq 리스트 검색 -->
+	<select id="search_faq" parameterType="Map" resultType="faqdto">
+	select * from faq where ftext like concat('%',#{search},'%') or fsubject like concat('%',#{search},'%')
+	</select>
+	
+	<!-- Faq 리스트 -->
+	<select id="faq_list" parameterType="String" resultType="faqdto">
+	select * from faq order by fidx desc
+	</select>
+	
+	<!-- 항공코드 리스트 검색 -->
+	<select id="search_aircode" parameterType="Map" resultType="aircodedto">
+	select * from air_code
+	<where> 
+		<if test="part == 1">	<!-- 첫번째 조건 -->
+			airname like concat('%',#{search},'%')
+		</if>
+		
+		<if test="part == 2">
+			aircode like concat('%',#{search},'%')
+		</if>
+	</where>
+		order by aidx desc
+	</select>
+	
+	<!-- 항공코드 리스트 -->
+	<select id="code_list" parameterType="String" resultType="aircodedto">
+	select * from air_code order by aidx desc
+	</select>
+	
+	<!-- 항공편 리스트 -->
+	<select id="all_airplane" parameterType="String" resultType="airplanedto">
+	select pidx, airplane_code, airname, aircode, airflight, start_point, end_point, seat_style, seat, air_use, indate from air_plane order by pidx desc
+	</select>
+	
+	<!-- 항공편 리스트 검색 -->
+	<select id="search_airplane" parameterType="Map" resultType="airplanedto">
+	select * from air_plane
+	<where> 
+		<if test="part == 1">	<!-- 첫번째 조건 -->
+			airname like concat('%',#{search},'%')
+		</if>
+		
+		<if test="part == 2">
+			aircode like concat('%',#{search},'%')
+		</if>
+		
+	</where>
+		order by pidx desc
+	</select>
+	
+	<!-- 사이트 정보  -->
+	<select id="siteinfo" parameterType="String" resultType="sitedto">
+	select * from siteinfo where sidx = #{sidx}
+	</select>
+	
+	<!-- 관리자 리스트 -->
+	<select id="all_admin" parameterType="String" resultType="admindao">
+	select * from admin order by aidx desc
+	</select>
+	
+	<!-- 관리자 리스트 검색 -->
+	<select id="search_admin" parameterType="Map" resultType="admindao">
+	select * from admin order by aidx desc
+	</select>
+	
+	<!-- code 하나 보기 -->
+	<select id="code_view" parameterType="String" resultType="aircodedto">
+	select * from air_code where aidx = #{aidx}
+	</select>
+	
+	<!-- faq 보기 -->
+	<select id="faq_view" parameterType="String" resultType="faqdto">
+	select * from faq where fidx = #{fidx}
+	</select>
+	
+	<!-- 공지사항 보기 -->
+	<select id="notice_view" parameterType="String" resultType="noticedao">
+	select * from admin_notice where nidx = #{nidx}
+	</select>
+	
+	<!-- 공지사항 리스트 -->
+	<select id="admin_notice" parameterType="String" resultType="noticedao">
+	select * from admin_notice order by ntop, nidx desc
+	</select>
+	
+	<!-- 공지사항 등록 -->
+	<insert id="admin_notice_write" parameterType="String" >
+	insert into admin_notice(nidx,ntop,nsubject,nwrite,nattach,ntext,nnum,ndate) values('0',#{ntop},#{nsubject},#{nwrite},#{nattach},#{ntext},'0',now())
+	</insert>
+	
+	<!-- 항공코드 등록  -->
+	<insert id="code_insert">
+	insert into air_code(aidx,airplane,airname,aircode,airflight,airuse,airdate) values('0',#{airplane},#{airname},#{aircode},#{airflight},#{airuse},now())
+	</insert>
+	
+	<!-- 항공편 등록  -->
+	<insert id="airplane_insert">
+	insert into air_plane(pidx,aidx,airplane_code,airname, aircode, airflight,start_point,end_point,seat_style,seat, air_use, indate) values('0',#{aidx},#{airplane_code},#{airname},#{aircode},#{airflight},#{start_point},#{end_point},#{seat_style},#{seat},#{air_use},now())
+	</insert>
+	
+	<!-- 로그인 승인 -->
+	<update id="ok_admin" parameterType="String">
+	update admin set aok = 'Y' where aidx = #{aidx}
+	</update>
+	
+	<!-- 로그인 미승인 -->
+	<update id="no_admin" parameterType="String">
+	update admin set aok = 'N' where aid = #{aid}
+	</update>
+	
+	<!-- 회원관리 미승인 -->
+	<update id="no_admin2" parameterType="String">
+	update admin set aok = 'N' where aidx = #{aidx}
+	</update>
+	
+	<!-- 로그인 카운팅 초기화 -->
+	<update id="log_count_reset">
+	update admin set acount = 0 where aid = #{aid}
+	</update>
+	
+	<!-- Faq 수정 -->
+	<update id="code_modify">
+	update air_code set airplane = #{airplane}, airname = #{airname}, aircode = #{aircode}, airflight = #{airflight}, airuse = #{airuse} where aidx = #{aidx}
+	</update>
+	
+	<!-- Faq 수정 -->
+	<update id="faq_modify">
+	update faq set fsubject = #{fsubject}, ftext = #{ftext} where fidx = #{fidx}
+	</update>
+	
+	<!-- 사이트 정보 수정 -->
+	<update id="site_update" parameterType="String">
+	update siteinfo set site_title = #{site_title}, site_email = #{site_email}, site_point = #{site_point}, site_reserves = #{site_reserves}, site_level = #{site_level}, site_corpnm = #{site_corpnm}, site_corpno = #{site_corpno}, site_ceo = #{site_ceo}, site_tel = #{site_tel}, site_number1 = #{site_number1}, site_number2 = #{site_number2}, site_post = #{site_post} , site_add = #{site_add}, site_admin = #{site_admin}, site_admail = #{site_admail}, site_banknm = #{site_banknm}, site_bankno = #{site_bankno}, pay_card = #{pay_card}, pay_hp = #{pay_hp}, pay_book = #{pay_book}, pay_min_point = #{pay_min_point}, pay_max_point = #{pay_max_point}, pay_paper = #{pay_paper} where sidx = '1'
+	</update>
+	
+	<!-- 공지사항 수정 (신규 첨부파일 없을경우 - 기존파일) -->
+	<update id="notice_existing">
+	update admin_notice set ntop=#{ntop}, nsubject=#{nsubject}, ntext=#{ntext} where nidx=#{nidx}
+	</update>
+	
+	<!--공지사항 수정 (신규 첨부파일 있을경우)-->
+	<update id="notice_update">
+	update admin_notice set ntop=#{ntop}, nsubject=#{nsubject}, nattach=#{nattach}, ntext=#{ntext} where nidx=#{nidx}
+	</update>
+	
+	<!-- 로그인 실패 카운팅 -->
+	<update id="fail_count">
+	update admin set acount = acount+1 where aid = #{aid}
+	</update>
+	
+	<!-- 조회수 카운팅 -->
+	<update id="notice_count">
+	update admin_notice set nnum = nnum+1 where nidx = #{nidx}
+	</update>
+	
+	<!-- 공지사항 체크 삭제  -->
+	<delete id="notice_ck_del">
+	delete from admin_notice where nidx in (#{nidx})
+	</delete>
+	
+	<!-- 공지사항 삭제 -->
+	<delete id="notice_delete">
+	 delete from admin_notice where nidx = #{aa}
+	</delete>
+	
+	<!-- faq 삭제 -->
+	<delete id="faq_delete">
+	 delete from faq where fidx = #{fidx}
+	</delete>
+	
+	<!-- 코드 체크 삭제  -->
+	<delete id="code_ck_del">
+	delete from air_code where aidx in (#{aidx})
+	</delete>
+	
+	<!-- code 삭제 -->
+	<delete id="code_delete">
+	 delete from air_code where aidx = #{aidx}
+	</delete>
+	
+	<!-- 예매티켓 체크 취소 -->
+	<delete id="ticket_cancel">
+	 delete from ticket where tidx in (#{tidx})
+	</delete>
+	
+</mapper>
